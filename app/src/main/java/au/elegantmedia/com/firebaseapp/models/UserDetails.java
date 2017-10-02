@@ -1,4 +1,4 @@
-package au.elegantmedia.com.firebaseapp.helper;
+package au.elegantmedia.com.firebaseapp.models;
 
 /**
  * Created by Nisala on 9/20/17.
@@ -9,6 +9,7 @@ public class UserDetails {
     private String age;
     private String email;
     private String image;
+    private String key;
 
     public UserDetails() {
     }
@@ -25,6 +26,14 @@ public class UserDetails {
         this.name = name;
         this.age = age;
         this.email = email;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getImage() {
@@ -57,5 +66,12 @@ public class UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setValue(UserDetails newUserDetails) {
+        image = newUserDetails.image;
+        name = newUserDetails.name;
+        age = newUserDetails.age;
+        email = newUserDetails.email;
     }
 }

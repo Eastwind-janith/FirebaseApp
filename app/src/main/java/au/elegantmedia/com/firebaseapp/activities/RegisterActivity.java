@@ -1,17 +1,17 @@
-package au.elegantmedia.com.firebaseapp.activity;
+package au.elegantmedia.com.firebaseapp.activities;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -20,15 +20,16 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import au.elegantmedia.com.firebaseapp.R;
-import au.elegantmedia.com.firebaseapp.helper.FirebaseHelper;
-import au.elegantmedia.com.firebaseapp.helper.UserDetails;
+import au.elegantmedia.com.firebaseapp.helpers.FirebaseHelper;
+import au.elegantmedia.com.firebaseapp.models.UserDetails;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class RegisterActivity extends AppCompatActivity {
+
     private static final int PICK_IMAG = 4;
-    private static final int MEDIA_IMAGE = 23;
+
     @BindView(R.id.edt_name)
     EditText edtName;
     @BindView(R.id.edt_age)
@@ -39,40 +40,37 @@ public class RegisterActivity extends AppCompatActivity {
     Button btnSave;
     @BindView(R.id.btn_img)
     ImageButton btnImage;
+    @BindView(R.id.progressBar)
+    ProgressBar mProgressBar;
 
     UserDetails userDetails;
     Uri image;
+
     StorageReference storage;
     private DatabaseReference mDataBase;
     private String sName, sEmail, sAge, sImage;
 
     @OnClick(R.id.btn_save)
     public void save() {
+        mProgressBar.setVisibility(View.VISIBLE);
 
         storage = FirebaseStorage.getInstance().getReference();
-        final FirebaseHelper firebaseHelper = new FirebaseHelper(mDataBase,storage);
+        mDataBase = FirebaseDatabase.getInstance().getReference();
+
+        final FirebaseHelper firebaseHelper = new FirebaseHelper(mDataBase, storage);
 
         sName = edtName.getText().toString().trim();
         sAge = edtAge.getText().toString().trim();
         sEmail = edtEmail.getText().toString().trim();
 
-        firebaseHelper.uploadImage(this,image,btnImage);
+        userDetails = new UserDetails();
 
-        sImage = userDetails.getImage();
-        Log.i("tag",sImage);
+        userDetails.setName(sName);
+        userDetails.setAge(sAge);
+        userDetails.setEmail(sEmail);
 
-        userDetails = new UserDetails(sName, sAge, sEmail, sImage);
+        firebaseHelper.uploadImage(this, image, btnImage, userDetails);
 
-        mDataBase = FirebaseDatabase.getInstance().getReference();
-
-        if (isCheckED()) {
-            if (firebaseHelper.Save(userDetails)) {
-                Intent dataViewIntn = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(dataViewIntn);
-            }
-        } else {
-            Toast.makeText(RegisterActivity.this, "Enter All Data", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @OnClick(R.id.btn_img)
@@ -91,6 +89,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -124,7 +123,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_user) {
-            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+            startActivity(intent);
             return true;
         }
 

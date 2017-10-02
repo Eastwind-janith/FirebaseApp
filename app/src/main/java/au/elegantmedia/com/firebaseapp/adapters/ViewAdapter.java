@@ -1,16 +1,19 @@
-package au.elegantmedia.com.firebaseapp.adapter;
+package au.elegantmedia.com.firebaseapp.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import au.elegantmedia.com.firebaseapp.R;
-import au.elegantmedia.com.firebaseapp.helper.UserDetails;
+import au.elegantmedia.com.firebaseapp.models.UserDetails;
 
 /**
  * Created by Nisala on 9/20/17.
@@ -52,10 +55,12 @@ public class ViewAdapter extends BaseAdapter {
         TextView tvName = (TextView) convertView.findViewById(R.id.tv_name);
         TextView tvAge = (TextView) convertView.findViewById(R.id.tv_age);
         TextView tvEmail = (TextView) convertView.findViewById(R.id.tv_email);
+        ImageView imgView = (ImageView) convertView.findViewById(R.id.image_load);
         // Populate the data into the template view using the data object
         tvName.setText(userDetails.getName());
         tvAge.setText(userDetails.getAge());
         tvEmail.setText(userDetails.getEmail());
+        Picasso.with(context).load(userDetails.getImage()).into(imgView);
         // Return the completed view to render on screen
         return convertView;
     }

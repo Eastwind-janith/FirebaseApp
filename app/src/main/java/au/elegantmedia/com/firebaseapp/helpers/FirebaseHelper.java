@@ -1,7 +1,9 @@
-package au.elegantmedia.com.firebaseapp.helper;
+package au.elegantmedia.com.firebaseapp.helpers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -21,7 +23,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import au.elegantmedia.com.firebaseapp.activity.RegisterActivity;
+import au.elegantmedia.com.firebaseapp.activities.MainActivity;
+import au.elegantmedia.com.firebaseapp.models.UserDetails;
 
 /**
  * Created by Nisala on 9/21/17.
@@ -33,16 +36,19 @@ public class FirebaseHelper {
     private static final String TAG = "tag";
     DatabaseReference db;
     StorageReference storage;
+    Uri downloadUrl;
     Boolean save;
+
+    String key;
     ArrayList<UserDetails> userDetailList = new ArrayList<>();
 
-    public FirebaseHelper(DatabaseReference db,StorageReference storage) {
+    public FirebaseHelper(DatabaseReference db, StorageReference storage) {
         this.db = db;
-        this.storage=storage;
+        this.storage = storage;
     }
 
     //Write Data
-    public boolean Save(UserDetails userDetails) {
+    public boolean save(UserDetails userDetails) {
 
         if (userDetails == null) {
             save = false;
@@ -58,20 +64,6 @@ public class FirebaseHelper {
         return save;
     }
 
-//    public ArrayList<UserDetails> secMethod() {
-//        db.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                fetchData(dataSnapshot);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//        return userDetailList;
-//    }
 
     //retrieve data
     public ArrayList<UserDetails> setUserData() {
@@ -89,7 +81,7 @@ public class FirebaseHelper {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                fetchData(dataSnapshot);
             }
 
             @Override
@@ -111,19 +103,31 @@ public class FirebaseHelper {
         userDetailList.clear();
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
             UserDetails userDetails = ds.getValue(UserDetails.class);
+            userDetails.setKey(ds.getKey());
             userDetailList.add(userDetails);
         }
     }
 
-    public void uploadImage(final Context context, Uri image, ImageButton btnImage) {
+    public void updateDate(UserDetails userDetails) {
+        DatabaseReference newDb = db.child("UserDetails").child(userDetails.getKey());
+//
+//        newDb.child("name").removeValue();
+//        newDb.child("age").removeValue();
+//        newDb.child("")
+        newDb.setValue(userDetails);
 
-        if (image != null && btnImage!=null) {
+    }
+
+
+    public void uploadImage(final Context context, Uri image, ImageButton btnImage, final UserDetails userDetails) {
+
+        if (image != null && btnImage != null) {
 
             StorageReference filepath = storage.child("picture").child(image.getLastPathSegment());
 
-            btnImage.setDrawingCacheEnabled(true);
-            btnImage.buildDrawingCache();
-            Bitmap bitmap = btnImage.getDrawingCache();
+            //btnImage.setDrawingCacheEnabled(true);
+            //btnImage.buildDrawingCache();
+            Bitmap bitmap = ((BitmapDrawable) btnImage.getDrawable()).getBitmap();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
@@ -139,13 +143,35 @@ public class FirebaseHelper {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    UserDetails userDetails = new UserDetails();
+                    downloadUrl = taskSnapshot.getDownloadUrl();
                     userDetails.setImage(String.valueOf(downloadUrl));
+
+
+                    if (userDetails.getKey() != null) {
+
+                        updateDate(userDetails);
+                    } else {
+
+                        if (save(userDetails)) {
+
+                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(context, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                        }
+                    }
                 }
+
             });
         } else {
             Toast.makeText(context, "Image null", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void deleteData(Context context,UserDetails userDetails) {
+
+        DatabaseReference mDb = db.child("UserDetails").child(userDetails.getKey());
+        mDb.removeValue();
+
     }
 }
