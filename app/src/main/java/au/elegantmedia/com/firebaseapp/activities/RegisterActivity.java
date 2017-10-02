@@ -57,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance().getReference();
         mDataBase = FirebaseDatabase.getInstance().getReference();
 
-        final FirebaseHelper firebaseHelper = new FirebaseHelper(mDataBase, storage);
+        final FirebaseHelper firebaseHelper = new FirebaseHelper(this, mDataBase, storage);
 
         sName = edtName.getText().toString().trim();
         sAge = edtAge.getText().toString().trim();

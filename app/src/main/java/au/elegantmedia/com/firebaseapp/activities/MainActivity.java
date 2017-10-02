@@ -64,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
         mDataBase = FirebaseDatabase.getInstance().getReference();
         mStorage = FirebaseStorage.getInstance().getReference();
-        firebaseHepler = new FirebaseHelper(mDataBase, mStorage);
+        mDataBase.keepSynced(true);
+
+        firebaseHepler = new FirebaseHelper(this,mDataBase, mStorage);
 
         //Set Adapter to ListView
         lvDetails = (ListView) findViewById(R.id.lv_details);

@@ -38,13 +38,15 @@ public class FirebaseHelper {
     StorageReference storage;
     Uri downloadUrl;
     Boolean save;
+    Context contxt;
 
     String key;
     ArrayList<UserDetails> userDetailList = new ArrayList<>();
 
-    public FirebaseHelper(DatabaseReference db, StorageReference storage) {
+    public FirebaseHelper(Context contxt,DatabaseReference db, StorageReference storage) {
         this.db = db;
         this.storage = storage;
+        this.contxt = contxt;
     }
 
     //Write Data
@@ -150,6 +152,7 @@ public class FirebaseHelper {
                     if (userDetails.getKey() != null) {
 
                         updateDate(userDetails);
+                        contxt.startActivity(new Intent(contxt,MainActivity.class));
                     } else {
 
                         if (save(userDetails)) {
@@ -168,10 +171,10 @@ public class FirebaseHelper {
         }
     }
 
-    public void deleteData(Context context,UserDetails userDetails) {
+    public void deleteData(Context context, UserDetails userDetails) {
 
         DatabaseReference mDb = db.child("UserDetails").child(userDetails.getKey());
         mDb.removeValue();
-
+        contxt.startActivity(new Intent(contxt,MainActivity.class));
     }
 }
